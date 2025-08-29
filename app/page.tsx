@@ -108,23 +108,13 @@ export default function FolderSelector() {
         </div>
 
         <div className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="folder-input" className="text-sm font-medium text-foreground">
-              Selected Folder
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium text-foreground">
+              Click the Browse button and select the folder containing the codebase
             </label>
-            <div className="flex gap-2">
-              <input
-                id="folder-input"
-                type="text"
-                value={(getNormalizedBase() ? getNormalizedBase() : "") + (selectedFolder ? ensureTrailingBackslash(normalizeToBackslashes(selectedFolder)) : "")}
-                placeholder="No folder selected"
-                readOnly
-                className="flex-1 px-3 py-2 bg-background border border-input rounded-md text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-              <Button onClick={handleBrowseClick} variant="outline" className="px-4 bg-transparent">
-                Browse
-              </Button>
-            </div>
+            <Button onClick={handleBrowseClick} variant="outline" className="px-4 bg-transparent">
+              Browse
+            </Button>
           </div>
 
           <div className="space-y-4">
@@ -171,30 +161,20 @@ export default function FolderSelector() {
           {selectedFolder && (
             <div className="p-3 bg-muted rounded-md space-y-3">
               <p className="text-sm text-muted-foreground">
-                Selected: <span className="font-medium text-foreground">{selectedFolder}</span>
+                Selected Folder: <span className="font-medium text-foreground">{selectedFolder}</span>
               </p>
 
-              <div>
-                <h2 className="font-medium text-foreground">Folders:</h2>
-                <ul className="list-disc list-inside text-sm text-foreground">
-                  {folderList
-                    .filter((folder) => folder !== selectedFolder)
-                    .map((folder, idx) => {
-                      const normalizedRel = normalizeToBackslashes(folder);
-                      const fullPath = (getNormalizedBase() ? getNormalizedBase() : "") + normalizedRel;
-                      return <li key={idx}>{fullPath}</li>;
-                    })}
-                </ul>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="border border-input rounded-md bg-background p-3">
+                  <h2 className="font-medium text-foreground">Summary</h2>
+                </div>
+                <div className="border border-input rounded-md bg-background p-3">
+                  <h2 className="font-medium text-foreground">Directory Structure</h2>
+                </div>
               </div>
 
-              <div>
-                <h2 className="font-medium text-foreground">Files:</h2>
-                <ul className="list-disc list-inside text-sm text-foreground">
-                  {fileList.map((file, idx) => {
-                    const fileName = file.split("/").pop() ?? file;
-                    return <li key={idx}>{fileName}</li>;
-                  })}
-                </ul>
+              <div className="border border-input rounded-md bg-background p-3">
+                <h2 className="font-medium text-foreground">Files Content</h2>
               </div>
             </div>
           )}
