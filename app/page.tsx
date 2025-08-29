@@ -6,19 +6,10 @@ import { Button } from "@/components/ui/button";
 
 export default function FolderSelector() {
   const [selectedFolder, setSelectedFolder] = useState("");
-  const [fileList, setFileList] = useState<string[]>([]);
-  const [folderList, setFolderList] = useState<string[]>([]);
   const [filterMode, setFilterMode] = useState("Exclude");
   const [filterPattern, setFilterPattern] = useState("");
   const [sliderValue, setSliderValue] = useState(50);
-  const [basePath, setBasePath] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const normalizeToBackslashes = (path: string) => path.replaceAll("/", "\\");
-  const ensureTrailingBackslash = (path: string) =>
-    path.endsWith("\\") ? path : path + "\\";
-  const getNormalizedBase = () =>
-    basePath ? ensureTrailingBackslash(normalizeToBackslashes(basePath)) : "";
 
   const getFileSizeFromSlider = (value: number): number => {
     if (value <= 50) {
@@ -68,9 +59,6 @@ export default function FolderSelector() {
           }
         }
       }
-
-      setFileList(allFiles);
-      setFolderList(Array.from(allFolders));
     }
   };
 
@@ -83,23 +71,6 @@ export default function FolderSelector() {
       fileInputRef.current.setAttribute("webkitdirectory", "");
     }
   }, []);
-
-  useEffect(() => {
-    try {
-      const saved = window.localStorage.getItem("basePath");
-      if (saved) setBasePath(saved);
-    } catch {}
-  }, []);
-
-  useEffect(() => {
-    try {
-      if (basePath) {
-        window.localStorage.setItem("basePath", basePath);
-      } else {
-        window.localStorage.removeItem("basePath");
-      }
-    } catch {}
-  }, [basePath]);
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
