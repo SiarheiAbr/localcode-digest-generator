@@ -11,7 +11,12 @@ export default function FolderSelector() {
   const [filterMode, setFilterMode] = useState("Exclude");
   const [filterPattern, setFilterPattern] = useState("");
   const [sliderValue, setSliderValue] = useState(50);
+  const [basePath, setBasePath] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const normalizeToBackslashes = (path: string) => path.replaceAll("/", "\\");
+  const ensureTrailingBackslash = (path: string) => (path.endsWith("\\") ? path : path + "\\");
+  const getNormalizedBase = () => (basePath ? ensureTrailingBackslash(normalizeToBackslashes(basePath)) : "");
 
   const getFileSizeFromSlider = (value: number): number => {
     if (value <= 50) {
@@ -77,6 +82,23 @@ export default function FolderSelector() {
     }
   }, []);
 
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem("basePath");
+      if (saved) setBasePath(saved);
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    try {
+      if (basePath) {
+        window.localStorage.setItem("basePath", basePath);
+      } else {
+        window.localStorage.removeItem("basePath");
+      }
+    } catch {}
+  }, [basePath]);
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-2xl space-y-6">
@@ -94,7 +116,7 @@ export default function FolderSelector() {
               <input
                 id="folder-input"
                 type="text"
-                value={selectedFolder}
+                value={(getNormalizedBase() ? getNormalizedBase() : "") + (selectedFolder ? ensureTrailingBackslash(normalizeToBackslashes(selectedFolder)) : "")}
                 placeholder="No folder selected"
                 readOnly
                 className="flex-1 px-3 py-2 bg-background border border-input rounded-md text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
@@ -155,18 +177,23 @@ export default function FolderSelector() {
               <div>
                 <h2 className="font-medium text-foreground">Folders:</h2>
                 <ul className="list-disc list-inside text-sm text-foreground">
-                  {folderList.map((folder, idx) => (
-                    <li key={idx}>{folder}</li>
-                  ))}
+                  {folderList
+                    .filter((folder) => folder !== selectedFolder)
+                    .map((folder, idx) => {
+                      const normalizedRel = normalizeToBackslashes(folder);
+                      const fullPath = (getNormalizedBase() ? getNormalizedBase() : "") + normalizedRel;
+                      return <li key={idx}>{fullPath}</li>;
+                    })}
                 </ul>
               </div>
 
               <div>
                 <h2 className="font-medium text-foreground">Files:</h2>
                 <ul className="list-disc list-inside text-sm text-foreground">
-                  {fileList.map((file, idx) => (
-                    <li key={idx}>{file}</li>
-                  ))}
+                  {fileList.map((file, idx) => {
+                    const fileName = file.split("/").pop() ?? file;
+                    return <li key={idx}>{fileName}</li>;
+                  })}
                 </ul>
               </div>
             </div>
@@ -177,7 +204,6 @@ export default function FolderSelector() {
         <input
           ref={fileInputRef}
           type="file"
-          webkitdirectory=""
           multiple
           onChange={handleFolderSelect}
           className="hidden"
