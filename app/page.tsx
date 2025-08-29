@@ -15,8 +15,10 @@ export default function FolderSelector() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const normalizeToBackslashes = (path: string) => path.replaceAll("/", "\\");
-  const ensureTrailingBackslash = (path: string) => (path.endsWith("\\") ? path : path + "\\");
-  const getNormalizedBase = () => (basePath ? ensureTrailingBackslash(normalizeToBackslashes(basePath)) : "");
+  const ensureTrailingBackslash = (path: string) =>
+    path.endsWith("\\") ? path : path + "\\";
+  const getNormalizedBase = () =>
+    basePath ? ensureTrailingBackslash(normalizeToBackslashes(basePath)) : "";
 
   const getFileSizeFromSlider = (value: number): number => {
     if (value <= 50) {
@@ -103,23 +105,34 @@ export default function FolderSelector() {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-2xl space-y-6">
         <div className="text-center space-y-2">
-          <h1 className="text-2xl font-semibold text-foreground">Folder Selector</h1>
-          <p className="text-muted-foreground">Select a folder from your local machine</p>
+          <h1 className="text-2xl font-semibold text-foreground">
+            Folder Selector
+          </h1>
+          <p className="text-muted-foreground">
+            Select a folder from your local machine
+          </p>
         </div>
 
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <label className="text-sm font-medium text-foreground">
-              Click the Browse button and select the folder containing the codebase
+              Click the Browse button and select the folder containing the
+              codebase
             </label>
-            <Button onClick={handleBrowseClick} variant="outline" className="px-4 bg-transparent">
+            <Button
+              onClick={handleBrowseClick}
+              variant="outline"
+              className="px-4 bg-transparent"
+            >
               Browse
             </Button>
           </div>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Filter Options</label>
+              <label className="text-sm font-medium text-foreground">
+                Filter Options
+              </label>
               <div className="flex">
                 <select
                   value={filterMode}
@@ -161,7 +174,10 @@ export default function FolderSelector() {
           {selectedFolder && (
             <div className="p-3 bg-muted rounded-md space-y-3">
               <p className="text-sm text-muted-foreground">
-                Selected Folder: <span className="font-medium text-foreground">{selectedFolder}</span>
+                Selected Folder:{" "}
+                <span className="font-medium text-foreground">
+                  {selectedFolder}
+                </span>
               </p>
 
               <div className="grid grid-cols-2 gap-3">
@@ -169,7 +185,9 @@ export default function FolderSelector() {
                   <h2 className="font-medium text-foreground">Summary</h2>
                 </div>
                 <div className="border border-input rounded-md bg-background p-3">
-                  <h2 className="font-medium text-foreground">Directory Structure</h2>
+                  <h2 className="font-medium text-foreground">
+                    Directory Structure
+                  </h2>
                 </div>
               </div>
 
