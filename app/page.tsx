@@ -13,15 +13,16 @@ export default function FolderSelector() {
 
   const getFileSizeFromSlider = (value: number): number => {
     if (value <= 50) {
-      // Linear scaling from 1kB to 50kB (left side)
+      // Linear scaling from 1kB to 50kB (slider left side)
       return Math.round(1 + (value / 50) * 49); // 1kB at 0, 50kB at 50
-    } else {
-      // Exponential scaling from 50kB to 100MB (right side)
-      const rightProgress = (value - 50) / 50; // 0 to 1 for positions 50-100
-      const exponentialValue = Math.pow(rightProgress, 1.5);
-      const sizeInKb = 50 + exponentialValue * (100 * 1024 - 50); // 50kB to 100MB
-      return Math.round(sizeInKb);
     }
+
+    // Exponential scaling from 50kB to 100MB (slider right side)
+    const rightProgress = (value - 50) / 50; // 0 to 1 for positions 50-100
+    const exponentialValue = Math.pow(rightProgress, 1.5);
+    const sizeInKb = 50 + exponentialValue * (100 * 1024 - 50); // 50kB to 100MB
+
+    return Math.round(sizeInKb);
   };
 
   const formatFileSize = (sizeInKb: number): string => {
@@ -29,6 +30,7 @@ export default function FolderSelector() {
       const sizeInMb = Math.round(sizeInKb / 1024);
       return `${sizeInMb}MB`;
     }
+
     return `${sizeInKb}kB`;
   };
 
