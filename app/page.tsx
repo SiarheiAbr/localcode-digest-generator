@@ -162,7 +162,7 @@ export default function FolderSelector() {
           </p>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 border border-input rounded-md bg-background p-4">
           <div className="flex items-center justify-between">
             <label className="text-sm font-medium text-foreground">
               Click the Browse button and select the folder containing the
@@ -176,19 +176,31 @@ export default function FolderSelector() {
               Browse
             </Button>
           </div>
+          {selectedFolder && (
+            <p
+              className="text-sm text-muted-foreground"
+              aria-live="polite"
+              role="status"
+            >
+              Selected folder:{" "}
+              <span className="font-medium text-foreground">
+                {selectedFolder}
+              </span>
+            </p>
+          )}
 
           <div className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">
                 Filter Options
               </label>
-              <div className="flex">
+              <div className="flex w-[28rem]">
                 <select
                   value={filterMode}
                   onChange={(e) =>
                     setFilterMode(e.target.value as "Exclude" | "Include")
                   }
-                  className="px-3 py-2 bg-background border border-input rounded-l-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring border-r-0"
+                  className="w-40 px-3 py-2 bg-background border border-input rounded-l-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring border-r-0"
                 >
                   <option value="Exclude">Exclude</option>
                   <option value="Include">Include</option>
@@ -203,8 +215,8 @@ export default function FolderSelector() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
+            <div className="space-y-2 mt-6">
+              <label className="block text-sm font-medium text-foreground">
                 Include files under: {formatFileSize(currentFileSize)}
               </label>
               <input
@@ -213,7 +225,7 @@ export default function FolderSelector() {
                 max="100"
                 value={sliderValue}
                 onChange={(e) => setSliderValue(Number(e.target.value))}
-                className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer slider"
+                className="w-[28rem] h-2 bg-muted rounded-lg appearance-none cursor-pointer slider m-0"
               />
             </div>
 
@@ -227,50 +239,47 @@ export default function FolderSelector() {
               </Button>
             </div>
           </div>
+        </div>
 
-          {selectedFolder && digestResult && (
-            <div className="p-3 bg-muted rounded-md space-y-3">
-              {/* SUMMARY */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="border border-input rounded-md bg-background p-3">
-                  <h2 className="font-medium text-foreground">Summary</h2>
-                  <p className="text-sm text-foreground mt-2">
-                    Folder:{" "}
-                    <span className="font-medium">{selectedFolder}</span>
-                    <br />
-                    Files analyzed:{" "}
-                    <span className="font-medium">
-                      {digestResult.fileCount}
-                    </span>
-                    <br />
-                    Estimated tokens:{" "}
-                    <span className="font-medium">
-                      {formatTokenCount(digestResult.tokenCount)}
-                    </span>
-                  </p>
-                </div>
-
-                {/* DIRECTORY STRUCTURE */}
-                <div className="border border-input rounded-md bg-background p-3">
-                  <h2 className="font-medium text-foreground">
-                    Directory Structure
-                  </h2>
-                  <pre className="text-xs whitespace-pre mt-2">
-                    {renderDirectoryTree(digestResult.directoryStructure)}
-                  </pre>
-                </div>
+        {selectedFolder && digestResult && (
+          <div className="border border-input rounded-md bg-background p-4 space-y-3">
+            {/* SUMMARY */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="border border-input rounded-md bg-background p-3">
+                <h2 className="font-medium text-foreground">Summary</h2>
+                <p className="text-sm text-foreground mt-2">
+                  Folder: <span className="font-medium">{selectedFolder}</span>
+                  <br />
+                  Files analyzed:{" "}
+                  <span className="font-medium">{digestResult.fileCount}</span>
+                  <br />
+                  Estimated tokens:{" "}
+                  <span className="font-medium">
+                    {formatTokenCount(digestResult.tokenCount)}
+                  </span>
+                </p>
               </div>
 
-              {/* FILES CONTENT */}
+              {/* DIRECTORY STRUCTURE */}
               <div className="border border-input rounded-md bg-background p-3">
-                <h2 className="font-medium text-foreground">Files Content</h2>
-                <pre className="text-xs whitespace-pre-wrap mt-2 max-h-96 overflow-auto">
-                  {digestResult.lines.join("\n")}
+                <h2 className="font-medium text-foreground">
+                  Directory Structure
+                </h2>
+                <pre className="text-xs whitespace-pre mt-2">
+                  {renderDirectoryTree(digestResult.directoryStructure)}
                 </pre>
               </div>
             </div>
-          )}
-        </div>
+
+            {/* FILES CONTENT */}
+            <div className="border border-input rounded-md bg-background p-3">
+              <h2 className="font-medium text-foreground">Files Content</h2>
+              <pre className="text-xs whitespace-pre-wrap mt-2 max-h-96 overflow-auto">
+                {digestResult.lines.join("\n")}
+              </pre>
+            </div>
+          </div>
+        )}
 
         {/* Hidden file input for folder selection */}
         <input
