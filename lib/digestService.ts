@@ -82,6 +82,7 @@ export async function digestService(
 
   const directoryStructure = await buildDirectoryNode(
     rootName,
+    [rootName],
     request.files,
     request,
     lines,
@@ -103,6 +104,7 @@ function getRootFolder(files: File[]): string {
 
 async function buildDirectoryNode(
   dirName: string,
+  currentPathParts: string[],
   files: File[],
   request: ScanRequest,
   lines: string[],
@@ -118,8 +120,11 @@ async function buildDirectoryNode(
     const relPath = (f as any).webkitRelativePath || f.name;
     const parts = relPath.split("/");
 
-    if (parts[0] === dirName && parts.length === 2) {
-      // file in root
+    // Calculate path parts relative to current directory
+    const relativeParts = parts.slice(currentPathParts.length);
+
+    if (relativeParts.length === 1) {
+      // File directly in current directory
       if (isTextFile(f.name) && f.size <= request.maxSizeKb * 1024) {
         if (!matchesPattern(relPath, request.mode, fileRegexes, dirRegexes)) {
           continue;
@@ -129,10 +134,10 @@ async function buildDirectoryNode(
         appendFileHeader(lines, relPath);
         lines.push(...content.split("\n"));
         lines.push("", "");
-        dirFiles.push(parts[1]);
+        dirFiles.push(relativeParts[0]);
       }
-    } else if (parts[0] === dirName && parts.length > 2) {
-      const sub = parts[1];
+    } else if (relativeParts.length > 1) {
+      const sub = relativeParts[0];
       if (!grouped[sub]) grouped[sub] = [];
       grouped[sub].push(f);
     }
@@ -141,6 +146,7 @@ async function buildDirectoryNode(
   for (const sub of Object.keys(grouped)) {
     const subNode = await buildDirectoryNode(
       sub,
+      [...currentPathParts, sub],
       grouped[sub],
       request,
       lines,
