@@ -40,6 +40,16 @@ export default function FolderSelector() {
     return `${sizeInKb}kB`;
   };
 
+  const formatTokenCount = (count: number): string => {
+    if (count >= 1000) {
+      const inThousands = count / 1000;
+      const fixed =
+        inThousands >= 10 ? inThousands.toFixed(0) : inThousands.toFixed(1);
+      return `${fixed}k`;
+    }
+    return `${count}`;
+  };
+
   const currentFileSize = getFileSizeFromSlider(sliderValue);
 
   // --- helpers: render directory tree
@@ -231,6 +241,11 @@ export default function FolderSelector() {
                     Files analyzed:{" "}
                     <span className="font-medium">
                       {digestResult.fileCount}
+                    </span>
+                    <br />
+                    Estimated tokens:{" "}
+                    <span className="font-medium">
+                      {formatTokenCount(digestResult.tokenCount)}
                     </span>
                   </p>
                 </div>
