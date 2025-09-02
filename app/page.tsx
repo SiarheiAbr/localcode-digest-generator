@@ -135,6 +135,19 @@ export default function FolderSelector() {
     });
   };
 
+  const handleDownloadFilesContent = () => {
+    const text = (digestResult?.lines ?? []).join("\n");
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${selectedFolder || "files"}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
   const parsePatterns = (raw: string): string[] | undefined => {
     const parts = raw
       .split(/[,\n\r]+/)
@@ -183,9 +196,9 @@ export default function FolderSelector() {
         <div className="space-y-4 border border-input rounded-md bg-background p-4">
           <div className="flex items-center justify-between gap-6">
             <label className="text-sm font-medium text-foreground">
-              Click the Browse button and select the folder containing the
-              codebase. If the browser prompts you with a warning dialog, click
-              the 'Upload' button.
+              Click the Browse button to select the folder containing your
+              codebase. If a prompt appears, confirm your selection by clicking
+              Upload. Finally, proceed by clicking the Ingest button.
             </label>
             <Button
               onClick={handleBrowseClick}
@@ -313,7 +326,7 @@ export default function FolderSelector() {
                   {digestResult.lines.join("\n")}
                 </pre>
               </div>
-              <div className="mt-2">
+              <div className="mt-2 flex items-center gap-2">
                 <Button
                   onClick={handleCopyFilesContent}
                   variant="outline"
@@ -321,6 +334,14 @@ export default function FolderSelector() {
                   title="Copy to clipboard"
                 >
                   {copiedFiles ? "Copied!" : "Copy"}
+                </Button>
+                <Button
+                  onClick={handleDownloadFilesContent}
+                  variant="outline"
+                  className="px-3 hover:cursor-pointer"
+                  title="Download all content as a single file"
+                >
+                  Download
                 </Button>
               </div>
             </div>
