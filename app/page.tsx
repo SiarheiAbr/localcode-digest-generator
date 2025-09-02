@@ -152,7 +152,7 @@ export default function FolderSelector() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl space-y-6">
+      <div className="w-[55%] space-y-6">
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-semibold text-foreground">
             Folder Selector
@@ -163,10 +163,11 @@ export default function FolderSelector() {
         </div>
 
         <div className="space-y-4 border border-input rounded-md bg-background p-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-6">
             <label className="text-sm font-medium text-foreground">
               Click the Browse button and select the folder containing the
-              codebase
+              codebase. If the browser prompts you with a warning dialog, click
+              the 'Upload' button.
             </label>
             <Button
               onClick={handleBrowseClick}
