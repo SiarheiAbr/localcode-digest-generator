@@ -70,10 +70,16 @@ const textFileExtensions = [
   ".jsconfig",
 ];
 
-export async function digest(request: ScanRequest): Promise<DigestResult> {
+export async function digestService(
+  request: ScanRequest
+): Promise<DigestResult> {
   let fileCount = 0;
   const lines: string[] = [];
+
   const rootName = getRootFolder(request.files);
+
+  const { fileRegexes, dirRegexes } = preparePatternRegexes(request.patterns);
+
   const directoryStructure = await buildDirectoryNode(
     rootName,
     request.files,
@@ -81,10 +87,12 @@ export async function digest(request: ScanRequest): Promise<DigestResult> {
     lines,
     () => {
       fileCount++;
-    }
+    },
+    fileRegexes,
+    dirRegexes
   );
 
-  return { fileCount, lines, directoryStructure };
+  return { fileCount, lines, directoryStructure, tokenCount: 0 };
 }
 
 function getRootFolder(files: File[]): string {
@@ -98,7 +106,9 @@ async function buildDirectoryNode(
   files: File[],
   request: ScanRequest,
   lines: string[],
-  incrementFileCount: () => void
+  incrementFileCount: () => void,
+  fileRegexes: RegExp[],
+  dirRegexes: RegExp[]
 ): Promise<DirectoryNode> {
   const dirFiles: string[] = [];
   const subfolders: DirectoryNode[] = [];
@@ -107,9 +117,13 @@ async function buildDirectoryNode(
   for (const f of files) {
     const relPath = (f as any).webkitRelativePath || f.name;
     const parts = relPath.split("/");
+
     if (parts[0] === dirName && parts.length === 2) {
-      // файл в корне папки
+      // file in root
       if (isTextFile(f.name) && f.size <= request.maxSizeKb * 1024) {
+        if (!matchesPattern(relPath, request.mode, fileRegexes, dirRegexes)) {
+          continue;
+        }
         const content = await f.text();
         incrementFileCount();
         appendFileHeader(lines, relPath);
@@ -130,11 +144,36 @@ async function buildDirectoryNode(
       grouped[sub],
       request,
       lines,
-      incrementFileCount
+      incrementFileCount,
+      fileRegexes,
+      dirRegexes
     );
-    if (subNode.files.length > 0 || subNode.subfolders.length > 0) {
-      subfolders.push(subNode);
+
+    if (!subNode) continue;
+
+    const subPath = `${dirName}/${sub}`;
+    const matchesDir = dirRegexes.some((rx) => rx.test(subPath));
+
+    if (request.mode === "Exclude" && matchesDir) {
+      continue; // skip whole folder
     }
+
+    if (request.mode === "Include") {
+      const hasContent =
+        subNode.files.length > 0 || subNode.subfolders.length > 0;
+      if (matchesDir || hasContent) {
+        subfolders.push(subNode);
+      }
+    } else {
+      // Exclude mode: keep if not empty
+      if (subNode.files.length > 0 || subNode.subfolders.length > 0) {
+        subfolders.push(subNode);
+      }
+    }
+  }
+
+  if (dirFiles.length === 0 && subfolders.length === 0) {
+    return null as any;
   }
 
   return { name: dirName, files: dirFiles, subfolders };
@@ -148,4 +187,52 @@ function appendFileHeader(lines: string[], relPath: string) {
   lines.push("================================================");
   lines.push(`FILE: ${relPath}`);
   lines.push("================================================");
+}
+
+function preparePatternRegexes(patterns?: string[]): {
+  fileRegexes: RegExp[];
+  dirRegexes: RegExp[];
+} {
+  const fileRegexes: RegExp[] = [];
+  const dirRegexes: RegExp[] = [];
+
+  if (!patterns) return { fileRegexes, dirRegexes };
+
+  for (const pattern of patterns) {
+    if (pattern.includes("*") || pattern.includes("?")) {
+      fileRegexes.push(new RegExp(wildcardToRegex(pattern), "i"));
+    } else {
+      const dirPattern = pattern.replace(/\\/g, "/").replace(/\/$/, "");
+      dirRegexes.push(new RegExp(`(^|/)${dirPattern}(/|$)`, "i"));
+    }
+  }
+
+  return { fileRegexes, dirRegexes };
+}
+
+function wildcardToRegex(pattern: string): string {
+  return (
+    "^" +
+    pattern
+      .replace(/[.+^${}()|[\]\\]/g, "\\$&")
+      .replace(/\*/g, ".*")
+      .replace(/\?/g, ".") +
+    "$"
+  );
+}
+
+function matchesPattern(
+  relPath: string,
+  mode: "Exclude" | "Include",
+  fileRegexes: RegExp[],
+  dirRegexes: RegExp[]
+): boolean {
+  const fileName = relPath.split("/").pop() || relPath;
+  const matchesFile = fileRegexes.some((rx) => rx.test(fileName));
+  const matchesDir = dirRegexes.some((rx) => rx.test(relPath));
+  const matches = matchesFile || matchesDir;
+
+  if (mode === "Exclude" && matches) return false; // exclude matching
+  if (mode === "Include" && !matches) return false; // include only matching
+  return true;
 }

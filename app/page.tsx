@@ -3,25 +3,32 @@
 import type React from "react";
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { digestService } from "@/lib/digestService";
+import { tokenizerService } from "@/lib/tokenizerService";
+import type { ScanRequest, DigestResult, DirectoryNode } from "@/types/types";
 
 export default function FolderSelector() {
   const [selectedFolder, setSelectedFolder] = useState("");
-  const [filterMode, setFilterMode] = useState("Exclude");
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [filterMode, setFilterMode] = useState<"Exclude" | "Include">(
+    "Exclude"
+  );
   const [filterPattern, setFilterPattern] = useState("");
   const [sliderValue, setSliderValue] = useState(50);
+  const [digestResult, setDigestResult] = useState<DigestResult | null>(null);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // --- helpers: size slider ---
   const getFileSizeFromSlider = (value: number): number => {
     if (value <= 50) {
-      // Linear scaling from 1kB to 50kB (slider left side)
-      return Math.round(1 + (value / 50) * 49); // 1kB at 0, 50kB at 50
+      return Math.round(1 + (value / 50) * 49);
     }
 
-    // Exponential scaling from 50kB to 100MB (slider right side)
-    const rightProgress = (value - 50) / 50; // 0 to 1 for positions 50-100
+    // 50kB..100MB (exponential)
+    const rightProgress = (value - 50) / 50;
     const exponentialValue = Math.pow(rightProgress, 1.5);
-    const sizeInKb = 50 + exponentialValue * (100 * 1024 - 50); // 50kB to 100MB
-
+    const sizeInKb = 50 + exponentialValue * (100 * 1024 - 50);
     return Math.round(sizeInKb);
   };
 
@@ -30,42 +37,101 @@ export default function FolderSelector() {
       const sizeInMb = Math.round(sizeInKb / 1024);
       return `${sizeInMb}MB`;
     }
-
     return `${sizeInKb}kB`;
   };
 
   const currentFileSize = getFileSizeFromSlider(sliderValue);
 
+  // --- helpers: render directory tree
+  const renderDirectoryTree = (root: DirectoryNode | null): string => {
+    if (!root) return "Directory structure:\n(no files matched)";
+    const lines: string[] = [];
+    lines.push("Directory structure:");
+    lines.push(`└── ${root.name}/`);
+
+    const renderNode = (node: DirectoryNode, prefix: string) => {
+      // files (first)
+      const files = [...node.files].sort();
+      const folders = [...node.subfolders].sort((a, b) =>
+        a.name.localeCompare(b.name)
+      );
+
+      const total = files.length + folders.length;
+      const items: Array<{
+        type: "file" | "dir";
+        name: string;
+        node?: DirectoryNode;
+      }> = [
+        ...files.map((f) => ({ type: "file" as const, name: f })),
+        ...folders.map((d) => ({
+          type: "dir" as const,
+          name: d.name,
+          node: d,
+        })),
+      ];
+
+      items.forEach((item, idx) => {
+        const isLast = idx === total - 1;
+        const branch = isLast ? "└──" : "├──";
+        if (item.type === "file") {
+          lines.push(`${prefix}${branch} ${item.name}`);
+        } else {
+          lines.push(`${prefix}${branch} ${item.name}/`);
+          const nextPrefix = prefix + (isLast ? "    " : "│   ");
+          renderNode(item.node!, nextPrefix);
+        }
+      });
+    };
+
+    renderNode(root, "    ");
+    return lines.join("\n");
+  };
+
+  // --- handlers ---
   const handleFolderSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files && files.length > 0) {
-      // Get the folder name from the first file's relative path
-      const firstFile = files[0];
-      const folderPath = firstFile.webkitRelativePath;
+      const arr = Array.from(files);
+      setSelectedFiles(arr);
+
+      // Root folder name from webkitRelativePath
+      const firstFile = arr[0] as any;
+      const folderPath: string = firstFile.webkitRelativePath || arr[0].name;
       const rootFolder = folderPath.split("/")[0];
       setSelectedFolder(rootFolder);
-
-      // Collect all file paths
-      const allFiles: string[] = [];
-      const allFolders: Set<string> = new Set();
-
-      for (let i = 0; i < files.length; i++) {
-        const f = files[i];
-        allFiles.push(f.webkitRelativePath);
-
-        // Collect folder parts
-        const parts = f.webkitRelativePath.split("/");
-        if (parts.length > 1) {
-          for (let j = 0; j < parts.length - 1; j++) {
-            allFolders.add(parts.slice(0, j + 1).join("/"));
-          }
-        }
-      }
+      setDigestResult(null);
     }
   };
 
   const handleBrowseClick = () => {
     fileInputRef.current?.click();
+  };
+
+  const parsePatterns = (raw: string): string[] | undefined => {
+    const parts = raw
+      .split(/[,\n\r]+/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    return parts.length ? parts : undefined;
+  };
+
+  const handleIngest = async () => {
+    if (!selectedFiles.length) return;
+
+    const request: ScanRequest = {
+      files: selectedFiles,
+      maxSizeKb: currentFileSize,
+      mode: filterMode,
+      patterns: parsePatterns(filterPattern),
+    };
+
+    const baseDigest = await digestService(request);
+
+    const allText = baseDigest.lines.join("\n");
+    const tokens = tokenizerService.countTokens(allText);
+    const withTokens: DigestResult = { ...baseDigest, tokenCount: tokens };
+
+    setDigestResult(withTokens);
   };
 
   useEffect(() => {
@@ -109,7 +175,9 @@ export default function FolderSelector() {
               <div className="flex">
                 <select
                   value={filterMode}
-                  onChange={(e) => setFilterMode(e.target.value)}
+                  onChange={(e) =>
+                    setFilterMode(e.target.value as "Exclude" | "Include")
+                  }
                   className="px-3 py-2 bg-background border border-input rounded-l-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring border-r-0"
                 >
                   <option value="Exclude">Exclude</option>
@@ -140,32 +208,50 @@ export default function FolderSelector() {
             </div>
 
             <div className="flex justify-center">
-              <Button className="w-fit px-8">Ingest</Button>
+              <Button
+                className="w-fit px-8"
+                onClick={handleIngest}
+                disabled={!selectedFiles.length}
+              >
+                Ingest
+              </Button>
             </div>
           </div>
 
-          {selectedFolder && (
+          {selectedFolder && digestResult && (
             <div className="p-3 bg-muted rounded-md space-y-3">
-              <p className="text-sm text-muted-foreground">
-                Selected Folder:{" "}
-                <span className="font-medium text-foreground">
-                  {selectedFolder}
-                </span>
-              </p>
-
+              {/* SUMMARY */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="border border-input rounded-md bg-background p-3">
                   <h2 className="font-medium text-foreground">Summary</h2>
+                  <p className="text-sm text-foreground mt-2">
+                    Folder:{" "}
+                    <span className="font-medium">{selectedFolder}</span>
+                    <br />
+                    Files analyzed:{" "}
+                    <span className="font-medium">
+                      {digestResult.fileCount}
+                    </span>
+                  </p>
                 </div>
+
+                {/* DIRECTORY STRUCTURE */}
                 <div className="border border-input rounded-md bg-background p-3">
                   <h2 className="font-medium text-foreground">
                     Directory Structure
                   </h2>
+                  <pre className="text-xs whitespace-pre mt-2">
+                    {renderDirectoryTree(digestResult.directoryStructure)}
+                  </pre>
                 </div>
               </div>
 
+              {/* FILES CONTENT */}
               <div className="border border-input rounded-md bg-background p-3">
                 <h2 className="font-medium text-foreground">Files Content</h2>
+                <pre className="text-xs whitespace-pre-wrap mt-2 max-h-96 overflow-auto">
+                  {digestResult.lines.join("\n")}
+                </pre>
               </div>
             </div>
           )}

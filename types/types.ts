@@ -1,8 +1,8 @@
 export interface ScanRequest {
   files: File[];
-  patterns?: string[];
   maxSizeKb: number;
   mode: "Exclude" | "Include";
+  patterns?: string[];
 }
 
 export interface DirectoryNode {
@@ -14,5 +14,6 @@ export interface DirectoryNode {
 export interface DigestResult {
   fileCount: number;
   lines: string[];
-  directoryStructure: DirectoryNode;
+  directoryStructure: DirectoryNode | null;
+  tokenCount: number;
 }
