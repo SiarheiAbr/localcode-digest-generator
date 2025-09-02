@@ -16,6 +16,7 @@ export default function FolderSelector() {
   const [filterPattern, setFilterPattern] = useState("");
   const [sliderValue, setSliderValue] = useState(50);
   const [digestResult, setDigestResult] = useState<DigestResult | null>(null);
+  const [copiedDirectory, setCopiedDirectory] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -115,6 +116,14 @@ export default function FolderSelector() {
 
   const handleBrowseClick = () => {
     fileInputRef.current?.click();
+  };
+
+  const handleCopyDirectory = () => {
+    const text = renderDirectoryTree(digestResult?.directoryStructure ?? null);
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedDirectory(true);
+      setTimeout(() => setCopiedDirectory(false), 2000);
+    });
   };
 
   const parsePatterns = (raw: string): string[] | undefined => {
@@ -274,6 +283,16 @@ export default function FolderSelector() {
                   <pre className="text-xs whitespace-pre mt-2 max-h-96 overflow-auto">
                     {renderDirectoryTree(digestResult.directoryStructure)}
                   </pre>
+                </div>
+                <div className="mt-2">
+                  <Button
+                    onClick={handleCopyDirectory}
+                    variant="outline"
+                    className="px-3 hover:cursor-pointer"
+                    title="Copy to clipboard"
+                  >
+                    {copiedDirectory ? "Copied!" : "Copy"}
+                  </Button>
                 </div>
               </div>
             </div>
