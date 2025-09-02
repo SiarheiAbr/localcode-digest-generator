@@ -17,6 +17,7 @@ export default function FolderSelector() {
   const [sliderValue, setSliderValue] = useState(50);
   const [digestResult, setDigestResult] = useState<DigestResult | null>(null);
   const [copiedDirectory, setCopiedDirectory] = useState(false);
+  const [copiedFiles, setCopiedFiles] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -123,6 +124,14 @@ export default function FolderSelector() {
     navigator.clipboard.writeText(text).then(() => {
       setCopiedDirectory(true);
       setTimeout(() => setCopiedDirectory(false), 2000);
+    });
+  };
+
+  const handleCopyFilesContent = () => {
+    const text = (digestResult?.lines ?? []).join("\n");
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedFiles(true);
+      setTimeout(() => setCopiedFiles(false), 2000);
     });
   };
 
@@ -303,6 +312,16 @@ export default function FolderSelector() {
                 <pre className="text-xs whitespace-pre-wrap mt-2 max-h-96 overflow-auto">
                   {digestResult.lines.join("\n")}
                 </pre>
+              </div>
+              <div className="mt-2">
+                <Button
+                  onClick={handleCopyFilesContent}
+                  variant="outline"
+                  className="px-3 hover:cursor-pointer"
+                  title="Copy to clipboard"
+                >
+                  {copiedFiles ? "Copied!" : "Copy"}
+                </Button>
               </div>
             </div>
           </div>
