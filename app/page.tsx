@@ -253,7 +253,7 @@ export default function FolderSelector() {
                     Folder:{" "}
                     <span className="font-medium">{selectedFolder}</span>
                     <br />
-                    Files analyzed:{" "}
+                    Files processed:{" "}
                     <span className="font-medium">
                       {digestResult.fileCount}
                     </span>
