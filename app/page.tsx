@@ -244,40 +244,47 @@ export default function FolderSelector() {
 
         {selectedFolder && digestResult && (
           <div className="border border-input rounded-md bg-background p-4 space-y-3">
-            {/* SUMMARY */}
+            {/* SUMMARY + DIRECTORY */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="border border-input rounded-md bg-background p-3">
+              <div>
                 <h2 className="font-medium text-foreground">Summary</h2>
-                <p className="text-sm text-foreground mt-2">
-                  Folder: <span className="font-medium">{selectedFolder}</span>
-                  <br />
-                  Files analyzed:{" "}
-                  <span className="font-medium">{digestResult.fileCount}</span>
-                  <br />
-                  Estimated tokens:{" "}
-                  <span className="font-medium">
-                    {formatTokenCount(digestResult.tokenCount)}
-                  </span>
-                </p>
+                <div className="border border-input rounded-md bg-background p-3">
+                  <p className="text-sm text-foreground">
+                    Folder:{" "}
+                    <span className="font-medium">{selectedFolder}</span>
+                    <br />
+                    Files analyzed:{" "}
+                    <span className="font-medium">
+                      {digestResult.fileCount}
+                    </span>
+                    <br />
+                    Estimated tokens:{" "}
+                    <span className="font-medium">
+                      {formatTokenCount(digestResult.tokenCount)}
+                    </span>
+                  </p>
+                </div>
               </div>
 
-              {/* DIRECTORY STRUCTURE */}
-              <div className="border border-input rounded-md bg-background p-3">
+              <div>
                 <h2 className="font-medium text-foreground">
                   Directory Structure
                 </h2>
-                <pre className="text-xs whitespace-pre mt-2">
-                  {renderDirectoryTree(digestResult.directoryStructure)}
-                </pre>
+                <div className="border border-input rounded-md bg-background p-3">
+                  <pre className="text-xs whitespace-pre mt-2 max-h-96 overflow-auto">
+                    {renderDirectoryTree(digestResult.directoryStructure)}
+                  </pre>
+                </div>
               </div>
             </div>
 
-            {/* FILES CONTENT */}
-            <div className="border border-input rounded-md bg-background p-3">
+            <div>
               <h2 className="font-medium text-foreground">Files Content</h2>
-              <pre className="text-xs whitespace-pre-wrap mt-2 max-h-96 overflow-auto">
-                {digestResult.lines.join("\n")}
-              </pre>
+              <div className="border border-input rounded-md bg-background p-3">
+                <pre className="text-xs whitespace-pre-wrap mt-2 max-h-96 overflow-auto">
+                  {digestResult.lines.join("\n")}
+                </pre>
+              </div>
             </div>
           </div>
         )}
