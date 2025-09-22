@@ -182,7 +182,31 @@ export default function FolderSelector() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex flex-col items-center p-4">
+      {/* Header */}
+      <header className="w-full mb-6">
+        <div className="w-full flex items-center justify-between border border-input rounded-md bg-background px-4 py-3">
+          <div className="flex items-center gap-3">
+            <img
+              src="/placeholder-logo.svg"
+              alt="App logo"
+              className="h-6 w-6"
+            />
+            <span className="text-lg font-semibold text-foreground">
+              Local Codebase Digest Generator
+            </span>
+          </div>
+          <nav className="hidden sm:flex items-center gap-4 text-sm text-muted-foreground">
+            <a href="#" className="hover:text-foreground">
+              Docs
+            </a>
+            <a href="#" className="hover:text-foreground">
+              About
+            </a>
+          </nav>
+        </div>
+      </header>
+
       <div className="w-[55%] space-y-6">
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-semibold text-foreground">
@@ -203,7 +227,8 @@ export default function FolderSelector() {
             <Button
               onClick={handleBrowseClick}
               variant="outline"
-              className="px-4 bg-transparent"
+              className="px-4 bg-transparent button-browse"
+              role="button"
             >
               Browse
             </Button>
@@ -263,7 +288,8 @@ export default function FolderSelector() {
 
             <div className="flex justify-center">
               <Button
-                className="w-fit px-8"
+                className="w-fit px-8 button-ingest"
+                role="button"
                 onClick={handleIngest}
                 disabled={!selectedFiles.length}
               >
@@ -358,6 +384,23 @@ export default function FolderSelector() {
           aria-hidden="true"
         />
       </div>
+
+      {/* Footer */}
+      <footer className="w-full mt-8">
+        <div className="w-full border border-input rounded-md bg-background px-4 py-3 text-xs text-muted-foreground flex items-center justify-between">
+          <span>
+            © {new Date().getFullYear()} Local Digest. All rights reserved.
+          </span>
+          <div className="flex items-center gap-4">
+            <a href="#" className="hover:text-foreground">
+              Privacy
+            </a>
+            <a href="#" className="hover:text-foreground">
+              Terms
+            </a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
