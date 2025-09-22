@@ -184,45 +184,43 @@ export default function FolderSelector() {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center p-4">
       {/* Header */}
-      <header className="w-full mb-6">
-        <div className="w-full flex items-center justify-between border border-input rounded-md bg-background px-4 py-3">
+      <header className="w-full mb-10 border-b-3 border-border bg-gray-100 dark:bg-gray-700 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+          {/* Logo + Title */}
           <div className="flex items-center gap-3">
-            <img
-              src="/placeholder-logo.svg"
-              alt="App logo"
-              className="h-6 w-6"
-            />
-            <span className="text-lg font-semibold text-foreground">
+            <img src="/logo.png" alt="App logo" className="h-7 w-7" />
+            <span className="text-base sm:text-lg font-semibold tracking-tight text-foreground">
               Local Codebase Digest Generator
             </span>
           </div>
-          <nav className="hidden sm:flex items-center gap-4 text-sm text-muted-foreground">
+
+          {/* Navigation */}
+          <nav className="hidden sm:flex items-center gap-6 text-sm text-muted-foreground">
             <a href="#" className="hover:text-foreground">
-              Docs
-            </a>
-            <a href="#" className="hover:text-foreground">
-              About
+              GitHub
             </a>
           </nav>
         </div>
       </header>
 
-      <div className="w-[55%] space-y-6">
+      <div className="w-[55%] space-y-6 flex-1">
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-semibold text-foreground">
-            Folder Selector
+            Prompt-friendly Local Codebase
           </h1>
           <p className="text-muted-foreground">
-            Select a folder from your local machine
+            Turn any local codebase into a simple text digest of its code. This
+            is useful for feeding a codebase into any LLM.
           </p>
         </div>
 
         <div className="space-y-4 border border-input rounded-md bg-background p-4">
           <div className="flex items-center justify-between gap-6">
-            <label className="text-sm font-medium text-foreground">
-              Click the Browse button to select the folder containing your
-              codebase. If a prompt appears, confirm your selection by clicking
-              Upload. Finally, proceed by clicking the Ingest button.
+            <label className="text-sm text-foreground">
+              Click the <i>Browse</i> button to select the folder containing
+              your codebase. If a prompt appears, confirm your selection by
+              clicking <i>Upload</i>. Finally, proceed by clicking the{" "}
+              <i>Ingest</i> button.
             </label>
             <Button
               onClick={handleBrowseClick}
