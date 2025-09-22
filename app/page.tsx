@@ -20,6 +20,7 @@ export default function FolderSelector() {
   const [copiedFiles, setCopiedFiles] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const summaryRef = useRef<HTMLDivElement | null>(null);
 
   // --- helpers: size slider ---
   const getFileSizeFromSlider = (value: number): number => {
@@ -157,7 +158,9 @@ export default function FolderSelector() {
   };
 
   const handleIngest = async () => {
-    if (!selectedFiles.length) return;
+    if (!selectedFiles.length) {
+      return;
+    }
 
     const request: ScanRequest = {
       files: selectedFiles,
@@ -173,6 +176,14 @@ export default function FolderSelector() {
     const withTokens: DigestResult = { ...baseDigest, tokenCount: tokens };
 
     setDigestResult(withTokens);
+
+    // Scroll to summary panel
+    setTimeout(() => {
+      summaryRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 100);
   };
 
   useEffect(() => {
@@ -298,7 +309,10 @@ export default function FolderSelector() {
         </div>
 
         {selectedFolder && digestResult && (
-          <div className="border border-input rounded-md bg-background p-4 space-y-3">
+          <div
+            ref={summaryRef}
+            className="border border-input rounded-md bg-background p-4 space-y-3"
+          >
             {/* SUMMARY + DIRECTORY */}
             <div className="grid grid-cols-2 gap-3">
               <div>
