@@ -181,7 +181,7 @@ export default function FolderSelector() {
     setTimeout(() => {
       summaryRef.current?.scrollIntoView({
         behavior: "smooth",
-        block: "start",
+        block: "nearest",
       });
     }, 100);
   };
@@ -195,7 +195,7 @@ export default function FolderSelector() {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center p-4">
       {/* Header */}
-      <header className="w-full mb-10 border-b-3 border-border bg-gray-100 dark:bg-gray-700 backdrop-blur-sm">
+      <header className="fixed top-0 left-0 right-0 z-50 w-full mb-10 border-b-3 border-border bg-gray-100 dark:bg-gray-700 backdrop-blur-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           {/* Logo + Title */}
           <div className="flex items-center gap-3">
@@ -214,7 +214,7 @@ export default function FolderSelector() {
         </div>
       </header>
 
-      <div className="w-[55%] space-y-6 flex-1">
+      <div className="w-[55%] space-y-6 flex-1 pt-20">
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-semibold text-foreground">
             Prompt-friendly Local Codebase
