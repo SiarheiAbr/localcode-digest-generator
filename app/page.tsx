@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { digestService } from "@/lib/digestService";
 import { tokenizerService } from "@/lib/tokenizerService";
 import type { ScanRequest, DigestResult, DirectoryNode } from "@/types/types";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 export default function FolderSelector() {
   const [selectedFolder, setSelectedFolder] = useState("");
@@ -194,25 +196,7 @@ export default function FolderSelector() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center p-4">
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 w-full mb-10 border-b-3 border-border bg-gray-100 dark:bg-gray-700 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          {/* Logo + Title */}
-          <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="App logo" className="h-7 w-7" />
-            <span className="text-base sm:text-lg font-semibold tracking-tight text-foreground">
-              Local Codebase Digest Generator
-            </span>
-          </div>
-
-          {/* Navigation */}
-          <nav className="hidden sm:flex items-center gap-6 text-sm text-muted-foreground">
-            <a href="#" className="hover:text-foreground">
-              GitHub
-            </a>
-          </nav>
-        </div>
-      </header>
+      <Header />
 
       <div className="w-[55%] space-y-6 flex-1 pt-20">
         <div className="text-center space-y-2">
@@ -397,22 +381,7 @@ export default function FolderSelector() {
         />
       </div>
 
-      {/* Footer */}
-      <footer className="w-full mt-8">
-        <div className="w-full border border-input rounded-md bg-background px-4 py-3 text-xs text-muted-foreground flex items-center justify-between">
-          <span>
-            © {new Date().getFullYear()} Local Digest. All rights reserved.
-          </span>
-          <div className="flex items-center gap-4">
-            <a href="#" className="hover:text-foreground">
-              Privacy
-            </a>
-            <a href="#" className="hover:text-foreground">
-              Terms
-            </a>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
