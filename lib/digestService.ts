@@ -97,8 +97,12 @@ export async function digestService(
 }
 
 function getRootFolder(files: File[]): string {
-  if (files.length === 0) return "";
+  if (files.length === 0) {
+    return "";
+  }
+
   const path = (files[0] as any).webkitRelativePath || files[0].name;
+
   return path.split("/")[0];
 }
 
@@ -155,7 +159,9 @@ async function buildDirectoryNode(
       dirRegexes
     );
 
-    if (!subNode) continue;
+    if (!subNode) {
+      continue;
+    }
 
     const subPath = `${dirName}/${sub}`;
     const matchesDir = dirRegexes.some((rx) => rx.test(subPath));
@@ -238,7 +244,12 @@ function matchesPattern(
   const matchesDir = dirRegexes.some((rx) => rx.test(relPath));
   const matches = matchesFile || matchesDir;
 
-  if (mode === "Exclude" && matches) return false; // exclude matching
-  if (mode === "Include" && !matches) return false; // include only matching
+  if (mode === "Exclude" && matches) {
+    return false;
+  } // exclude matching
+  if (mode === "Include" && !matches) {
+    return false;
+  } // include only matching
+
   return true;
 }
