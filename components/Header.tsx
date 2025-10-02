@@ -12,7 +12,10 @@ const Header: React.FC = () => (
       </div>
       {/* Navigation */}
       <nav className="hidden sm:flex items-center gap-6 text-sm text-muted-foreground">
-        <a href="#" className="hover:text-foreground">
+        <a
+          href="https://github.com/SiarheiAbr/localcode-digest-generator"
+          className="hover:text-foreground"
+        >
           GitHub
         </a>
       </nav>
