@@ -7,11 +7,8 @@ const Footer: React.FC = () => (
         © {new Date().getFullYear()} Local Digest. All rights reserved.
       </span>
       <div className="flex items-center gap-4">
-        <a href="#" className="hover:text-foreground">
-          Privacy
-        </a>
-        <a href="#" className="hover:text-foreground">
-          Terms
+        <a href="mailto:uef007@gmail.com" className="hover:text-foreground">
+          Contact
         </a>
       </div>
     </div>
