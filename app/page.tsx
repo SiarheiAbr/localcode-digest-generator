@@ -8,6 +8,12 @@ import { tokenizerService } from "@/lib/tokenizerService";
 import type { ScanRequest, DigestResult, DirectoryNode } from "@/types/types";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import {
+  getFileSizeFromSlider,
+  formatFileSize,
+  formatTokenCount,
+} from "@/utils/fileSize";
+import renderDirectoryTree from "@/utils/renderDirectoryTree";
 
 export default function FolderSelector() {
   const [selectedFolder, setSelectedFolder] = useState("");
@@ -24,83 +30,7 @@ export default function FolderSelector() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const summaryRef = useRef<HTMLDivElement | null>(null);
 
-  // --- helpers: size slider ---
-  const getFileSizeFromSlider = (value: number): number => {
-    if (value <= 50) {
-      return Math.round(1 + (value / 50) * 49);
-    }
-
-    // 50kB..100MB (exponential)
-    const rightProgress = (value - 50) / 50;
-    const exponentialValue = Math.pow(rightProgress, 1.5);
-    const sizeInKb = 50 + exponentialValue * (100 * 1024 - 50);
-    return Math.round(sizeInKb);
-  };
-
-  const formatFileSize = (sizeInKb: number): string => {
-    if (sizeInKb >= 1024) {
-      const sizeInMb = Math.round(sizeInKb / 1024);
-      return `${sizeInMb}MB`;
-    }
-    return `${sizeInKb}kB`;
-  };
-
-  const formatTokenCount = (count: number): string => {
-    if (count >= 1000) {
-      const inThousands = count / 1000;
-      const fixed =
-        inThousands >= 10 ? inThousands.toFixed(0) : inThousands.toFixed(1);
-      return `${fixed}k`;
-    }
-    return `${count}`;
-  };
-
   const currentFileSize = getFileSizeFromSlider(sliderValue);
-
-  // --- helpers: render directory tree
-  const renderDirectoryTree = (root: DirectoryNode | null): string => {
-    if (!root) return "Directory structure:\n(no files matched)";
-    const lines: string[] = [];
-    lines.push("Directory structure:");
-    lines.push(`└── ${root.name}/`);
-
-    const renderNode = (node: DirectoryNode, prefix: string) => {
-      // files (first)
-      const files = [...node.files].sort();
-      const folders = [...node.subfolders].sort((a, b) =>
-        a.name.localeCompare(b.name)
-      );
-
-      const total = files.length + folders.length;
-      const items: Array<{
-        type: "file" | "dir";
-        name: string;
-        node?: DirectoryNode;
-      }> = [
-        ...files.map((f) => ({ type: "file" as const, name: f })),
-        ...folders.map((d) => ({
-          type: "dir" as const,
-          name: d.name,
-          node: d,
-        })),
-      ];
-
-      items.forEach((item, idx) => {
-        const isLast = idx === total - 1;
-        const branch = isLast ? "└──" : "├──";
-        if (item.type === "file") {
-          lines.push(`${prefix}${branch} ${item.name}`);
-        } else {
-          lines.push(`${prefix}${branch} ${item.name}/`);
-          const nextPrefix = prefix + (isLast ? "    " : "│   ");
-          renderNode(item.node!, nextPrefix);
-        }
-      });
-    };
-
-    renderNode(root, "    ");
-    return lines.join("\n");
-  };
 
   // --- handlers ---
   const handleFolderSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
