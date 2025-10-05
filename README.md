@@ -2,6 +2,7 @@
 
 A Next.js web application that allows you to turn any local codebase into a simplified, prompt-friendly digest.
 This is useful for preparing a project’s source code for analysis with Large Language Models (LLMs).
+Inspired by [Gitingest](https://gitingest.com/).
 <br/><br/><br/>
 ✨ Features
 
